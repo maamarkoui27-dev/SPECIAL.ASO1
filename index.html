@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASO | Official Biolink</title>
+    <meta name="description" content="Official Biolink and Socials of ASO - Solo Leveling & Gaming Creator.">
+    <meta name="theme-color" content="#7928ca">
+
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="ASO | Official Biolink">
+    <meta property="og:description" content="Solo Leveling edits, gaming, and content creator.">
+    <meta property="og:type" content="website">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- CSS Stylesheet -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Click to Enter Overlay — ASO Exclusive -->
+    <div id="enter-overlay" class="enter-overlay">
+        <div class="enter-content">
+            <!-- ASO Avatar -->
+            <div class="enter-avatar-ring">
+                <img src="saso.jpg" alt="ASO" class="enter-avatar-img">
+            </div>
+            <!-- ASO Name -->
+            <div class="enter-aso-name">
+                <span class="enter-letter">A</span>
+                <span class="enter-letter">S</span>
+                <span class="enter-letter">O</span>
+            </div>
+            <!-- Tagline -->
+            <p class="enter-subtitle">JUST BE SPECIAL</p>
+            <!-- Click button -->
+            <div class="enter-glitch-text" data-text="[ CLICK TO ENTER ]" style="margin-top:8px">[ CLICK TO ENTER ]</div>
+        </div>
+        <div class="enter-fog"></div>
+    </div>
+
+    <!-- Background Video Container -->
+    <div class="video-bg-container">
+        <video id="bg-video" loop playsinline preload="auto">
+            <source src="animeotaku.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+        <div class="video-overlay"></div>
+        <canvas id="particle-canvas"></canvas>
+    </div>
+
+    <!-- Custom Glowing Cursor -->
+    <div id="custom-cursor" class="custom-cursor"></div>
+    <div id="cursor-follower" class="cursor-follower"></div>
+
+    <!-- Audio Visualizer & Control Widget (Top Right) -->
+    <div class="audio-control-widget" id="audio-widget" title="Audio Controller">
+        <div class="visualizer-bars" id="visualizer">
+            <span class="bar"></span>
+            <span class="bar"></span>
+            <span class="bar"></span>
+            <span class="bar"></span>
+            <span class="bar"></span>
+        </div>
+        <div class="audio-info">
+            <span class="audio-title">Solo Leveling</span>
+            <span class="audio-status" id="audio-status">PLAYING</span>
+        </div>
+        <button id="audio-toggle-btn" class="audio-btn" aria-label="Play/Pause" title="Play / Pause">
+            <i class="fa-solid fa-pause" id="volume-icon"></i>
+        </button>
+        <div class="volume-control-container">
+            <i class="fa-solid fa-volume-high" id="volume-indicator-icon"></i>
+            <input type="range" id="volume-slider" class="volume-slider" min="0" max="1" step="0.01" value="0.65" aria-label="Volume Slider">
+        </div>
+    </div>
+
+    <!-- Main Container (Directly on Video) -->
+    <main class="main-wrapper">
+        <div class="profile-card" id="profile-card">
+            <!-- Smooth Dual-Avatar Container (saso.jpg & aso.png) -->
+            <div class="avatar-wrapper">
+                <div class="avatar-frame" id="avatar-frame" title="Click to switch avatar">
+                    <img src="saso.jpg" alt="ASO Avatar 1" class="avatar-slide active" id="avatar-1">
+                    <img src="aso.png" alt="ASO Avatar 2" class="avatar-slide" id="avatar-2">
+                </div>
+            </div>
+
+            <!-- Username with floating Pure White Royal Pearl Crown & Sequential 3D Letters -->
+            <div class="user-identity">
+                <div class="name-container">
+                    <h1 class="username" aria-label="ASO">
+                        <span class="letter" style="--i: 0;">A</span>
+                        <span class="letter" style="--i: 1;">S</span>
+                        <span class="letter" style="--i: 2;">O</span>
+                    </h1>
+                </div>
+            </div>
+
+            <!-- Social Links Icons Row -->
+            <div class="socials-row">
+                <!-- TikTok -->
+                <a href="https://www.tiktok.com/@aso_special" target="_blank" rel="noopener noreferrer" class="social-icon-btn icon-tiktok" data-tooltip="TikTok" aria-label="TikTok">
+                    <i class="fa-brands fa-tiktok"></i>
+                </a>
+
+                <!-- Instagram -->
+                <a href="https://www.instagram.com/special_aso/" target="_blank" rel="noopener noreferrer" class="social-icon-btn icon-instagram" data-tooltip="Instagram" aria-label="Instagram">
+                    <i class="fa-brands fa-instagram"></i>
+                </a>
+
+                <!-- Discord -->
+                <a href="https://discord.gg/4d8tCBVgWa" target="_blank" rel="noopener noreferrer" class="social-icon-btn icon-discord" data-tooltip="Discord" aria-label="Discord">
+                    <i class="fa-brands fa-discord"></i>
+                </a>
+
+                <!-- YouTube -->
+                <a href="https://www.youtube.com/@ASOFF7" target="_blank" rel="noopener noreferrer" class="social-icon-btn icon-youtube" data-tooltip="YouTube" aria-label="YouTube">
+                    <i class="fa-brands fa-youtube"></i>
+                </a>
+
+                <!-- Kick -->
+                <a href="https://kick.com/aso1special?utm_source=ig&utm_medium=social&utm_content=link_in_bio" target="_blank" rel="noopener noreferrer" class="social-icon-btn icon-kick" data-tooltip="Kick" aria-label="Kick" id="kick-btn">
+                    <svg viewBox="0 0 100 100" fill="currentColor" width="1em" height="1em" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Kick K logo: vertical bar + upper diagonal + lower diagonal -->
+                        <rect x="10" y="10" width="22" height="80" rx="5"/>
+                        <polygon points="32,10 32,47 72,10 94,10 55,50 94,90 72,90 32,53 32,90 10,90 10,10"/>
+                    </svg>
+                </a>
+
+                <!-- VUZ -->
+                <a href="https://vuz.com/fr/channel/10467?utm_source=ig&utm_medium=social&utm_content=link_in_bio" target="_blank" rel="noopener noreferrer" class="social-icon-btn icon-vuz" data-tooltip="VUZ" aria-label="VUZ" id="vuz-btn">
+                    <svg viewBox="0 0 100 100" fill="currentColor" width="1em" height="1em" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Outer ring -->
+                        <circle cx="50" cy="50" r="46" fill="none" stroke="currentColor" stroke-width="8"/>
+                        <!-- Play triangle -->
+                        <polygon points="40,30 40,70 75,50"/>
+                    </svg>
+                </a>
+            </div>
+        </div> <!-- /.profile-card -->
+    </main>
+
+    <!-- Bottom Left View Counter (Click to Toggle Metrics) -->
+    <div class="view-counter-widget" id="view-counter-widget" title="Click to toggle: Views / Visitors / Online" role="button" tabindex="0">
+        <i class="fa-solid fa-eye" id="view-icon"></i>
+        <span class="counter-num" id="view-count">0</span>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">
+        <i class="fa-solid fa-check-circle"></i>
+        <span id="toast-message">Copied Discord Tag to Clipboard!</span>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
