@@ -603,6 +603,24 @@ body {
     filter: drop-shadow(0 0 14px #1e90ff) drop-shadow(0 0 26px #5eb8ff) drop-shadow(0 0 38px #0055cc) !important;
 }
 
+.icon-freefire {
+    color: #ff9900;
+}
+.icon-freefire:hover {
+    color: #ffb700 !important;
+    filter: drop-shadow(0 0 14px #ff9900) drop-shadow(0 0 26px #ff5500) drop-shadow(0 0 38px #ff2200) !important;
+}
+
+.ff-icon-img {
+    width: 1em;
+    height: 1em;
+    border-radius: 7px;
+    object-fit: cover;
+    display: block;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    pointer-events: none;
+}
+
 .icon-spotify:hover {
     color: #1ed760 !important;
     filter: drop-shadow(0 0 14px #1ed760) drop-shadow(0 0 24px #1db954) drop-shadow(0 0 30px #1ed760) !important;
@@ -823,6 +841,16 @@ body {
     font-family: var(--font-heading);
     letter-spacing: 0.5px;
     transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.counter-num.count-pulse {
+    animation: counterGlowPulse 0.6s ease-out;
+}
+
+@keyframes counterGlowPulse {
+    0%   { transform: scale(1); }
+    50%  { transform: scale(1.12); color: #10b981; text-shadow: 0 0 10px #10b981; }
+    100% { transform: scale(1); }
 }
 
 /* ==========================================================================

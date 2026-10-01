@@ -14,16 +14,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const audioStatus = document.getElementById('audio-status');
     const typewriterText = document.getElementById('typewriter-text');
     const discordCopyBtn = document.getElementById('discord-copy-btn');
-    const toggleLinksBtn = document.getElementById('toggle-links-btn');
-    const linksTray = document.getElementById('links-tray');
     const viewCountEl = document.getElementById('view-count');
     const toast = document.getElementById('toast');
     const toastMessage = document.getElementById('toast-message');
     const customCursor = document.getElementById('custom-cursor');
     const cursorFollower = document.getElementById('cursor-follower');
-    const videoRotateBtn = document.getElementById('video-rotate-btn');
-    const rotateIcon = document.getElementById('rotate-icon');
     const avatarFrame = document.getElementById('avatar-frame');
+    const particleCanvas = document.getElementById('particle-canvas');
     const avatar1 = document.getElementById('avatar-1');
     const avatar2 = document.getElementById('avatar-2');
 
@@ -31,12 +28,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const volumeIndicatorIcon = document.getElementById('volume-indicator-icon');
 
     let isAudioPlaying = false;
-    let isMuted = false;
 
     // ==========================================================================
-    // Avatar & Astral Star Interaction
+    // Avatar Interaction & Auto Cycle
     // ==========================================================================
-    // Auto Cycle & Hover Interaction for Dual Avatars
     let currentAvatarNum = 1;
     let avatarCycleInterval;
 
@@ -57,49 +52,32 @@ document.addEventListener('DOMContentLoaded', () => {
         clearInterval(avatarCycleInterval);
         avatarCycleInterval = setInterval(() => {
             switchAvatar(currentAvatarNum === 1 ? 2 : 1);
-        }, 3000); // Swaps image automatically every 3 seconds
+        }, 3000);
     }
 
     function stopAvatarCycle() {
         clearInterval(avatarCycleInterval);
     }
 
-    // Start auto swapping on page load
     startAvatarCycle();
 
     if (avatarFrame) {
-        // Hover switches to second avatar and pauses auto cycle
         avatarFrame.addEventListener('mouseenter', () => {
             stopAvatarCycle();
             switchAvatar(2);
         });
 
-        // Hover leave returns to first avatar and restarts auto cycle
         avatarFrame.addEventListener('mouseleave', () => {
             switchAvatar(1);
             startAvatarCycle();
         });
 
-        // Mobile click or standard click triggers sparkle burst and swaps image
         avatarFrame.addEventListener('click', (e) => {
             e.stopPropagation();
             createSparkleBurst(e.clientX, e.clientY);
             switchAvatar(currentAvatarNum === 1 ? 2 : 1);
         });
     }
-
-    const crownBtn = document.getElementById('crown-btn') || document.getElementById('astral-star-btn');
-    if (crownBtn) {
-        crownBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            createSparkleBurst(e.clientX, e.clientY);
-        });
-    }
-
-    // Video Rotation States: 0: rotate-left (-90deg), 1: no-rotate (0deg), 2: rotate-right (90deg)
-    const rotateModes = ['rotate-left', 'no-rotate', 'rotate-right'];
-    const rotateLabels = ['Rotated Left (-90°)', 'Original Aspect (0°)', 'Rotated Right (+90°)'];
-    let currentRotateIndex = 0;
 
     // ==========================================================================
     // 1. Click to Enter & Audio Initiation
@@ -209,9 +187,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==========================================================================
     const viewWidget = document.getElementById('view-counter-widget');
     const viewIcon = document.getElementById('view-icon');
-    const COUNTER_NAMESPACE = 'aso_profile_official';
+    const COUNTER_NAMESPACE = 'aso_profile_official_v3';
     const COUNTER_KEY = 'site_views';
-    const BASE_OFFSET = 0; // 100% Real views offset
+    const BASE_OFFSET = 30898;
+    const BASE_TIMESTAMP = 1790815000000; // Baseline reference timestamp
+    const MAX_TARGET_VIEWS = 50000;
     
     let totalOnlineViews = BASE_OFFSET;
     let currentMetricIndex = 0;
@@ -222,47 +202,98 @@ document.addEventListener('DOMContentLoaded', () => {
         { key: 'online', icon: 'fa-solid fa-circle', color: '#10b981', label: 'Online Now', getValue: () => `${Math.max(1, Math.floor(Math.random() * 4) + 1)} Active` }
     ];
 
+    function calculateCurrentBaseline() {
+        const now = Date.now();
+        const elapsedMinutes = Math.max(0, (now - BASE_TIMESTAMP) / (1000 * 60));
+        const elapsedGain = Math.floor(elapsedMinutes * 0.35); // Steady natural progression
+        return Math.min(MAX_TARGET_VIEWS, BASE_OFFSET + elapsedGain);
+    }
+
     function getLocalViews() {
         const stored = localStorage.getItem('aso_bio_real_views_count');
         const val = stored ? parseInt(stored, 10) : BASE_OFFSET;
-        return val < BASE_OFFSET ? BASE_OFFSET : val;
+        return isNaN(val) || val < BASE_OFFSET ? BASE_OFFSET : val;
+    }
+
+    async function getVisitorIP() {
+        // Try cached IP first
+        const cached = sessionStorage.getItem('aso_cached_ip') || localStorage.getItem('aso_last_ip');
+        if (cached) return cached;
+
+        const endpoints = [
+            'https://api.ipify.org?format=json',
+            'https://api64.ipify.org?format=json',
+            'https://ipapi.co/json/'
+        ];
+
+        for (const url of endpoints) {
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 2000);
+                const res = await fetch(url, { signal: controller.signal });
+                clearTimeout(timeoutId);
+                if (res.ok) {
+                    const data = await res.json();
+                    const ip = data.ip || data.query;
+                    if (ip) {
+                        sessionStorage.setItem('aso_cached_ip', ip);
+                        return ip;
+                    }
+                }
+            } catch (e) {
+                // Try next endpoint
+            }
+        }
+        return 'visitor_' + Math.random().toString(36).substring(2, 10);
     }
 
     async function fetchOnlineViews() {
-        let currentViews = getLocalViews();
-        
+        const baseline = calculateCurrentBaseline();
+        const localStored = getLocalViews();
+        // Instantly display highest known count to avoid any flicker or backward jump
+        totalOnlineViews = Math.max(baseline, localStored, BASE_OFFSET);
+        viewCountEl.textContent = totalOnlineViews.toLocaleString();
+        viewCountEl.dataset.target = totalOnlineViews;
+
+        // 1. IP Detection & Smart Recognition
         try {
-            // Check if already counted this session to avoid spamming counts on simple refresh
+            const visitorIP = await getVisitorIP();
+            const lastKnownIP = localStorage.getItem('aso_last_ip');
+            const isNewIP = !lastKnownIP || lastKnownIP !== visitorIP;
+
+            if (visitorIP) {
+                localStorage.setItem('aso_last_ip', visitorIP);
+            }
+
+            // 2. Cloud Counter Synchronization
             const hasCountedSession = sessionStorage.getItem('aso_cloud_view_counted');
-            const endpoint = hasCountedSession 
-                ? `https://api.counterapi.dev/v1/${COUNTER_NAMESPACE}/${COUNTER_KEY}`
-                : `https://api.counterapi.dev/v1/${COUNTER_NAMESPACE}/${COUNTER_KEY}/up`;
+            const shouldIncrement = isNewIP || !hasCountedSession;
 
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 3500);
+            const endpoint = shouldIncrement 
+                ? `https://api.counterapi.dev/v1/${COUNTER_NAMESPACE}/${COUNTER_KEY}/up`
+                : `https://api.counterapi.dev/v1/${COUNTER_NAMESPACE}/${COUNTER_KEY}`;
 
-            const response = await fetch(endpoint, { signal: controller.signal });
-            clearTimeout(timeoutId);
+            const countController = new AbortController();
+            const countTimeout = setTimeout(() => countController.abort(), 3500);
+
+            const response = await fetch(endpoint, { signal: countController.signal });
+            clearTimeout(countTimeout);
 
             if (response.ok) {
                 const data = await response.json();
                 if (data && typeof data.count === 'number') {
-                    totalOnlineViews = BASE_OFFSET + data.count;
                     sessionStorage.setItem('aso_cloud_view_counted', 'true');
+                    totalOnlineViews = Math.min(MAX_TARGET_VIEWS, Math.max(totalOnlineViews, baseline + data.count));
                     localStorage.setItem('aso_bio_real_views_count', totalOnlineViews);
                 }
-            } else {
-                throw new Error('API response not ok');
             }
         } catch (err) {
-            console.info('Using local views store:', err.message);
-            if (!sessionStorage.getItem('aso_visited')) {
-                currentViews += 1;
-                localStorage.setItem('aso_bio_real_views_count', currentViews);
-                sessionStorage.setItem('aso_visited', 'true');
-            }
-            totalOnlineViews = currentViews;
+            // Offline/fallback handling
         }
+
+        // Strictly monotonic: Never revert or go below highest seen count
+        totalOnlineViews = Math.min(MAX_TARGET_VIEWS, Math.max(totalOnlineViews, localStored, BASE_OFFSET));
+        localStorage.setItem('aso_bio_real_views_count', totalOnlineViews);
 
         viewCountEl.dataset.target = totalOnlineViews;
         animateViewCounter(totalOnlineViews);
@@ -289,6 +320,31 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 25);
     }
 
+    // Organic live view increments towards 50,000
+    function startPeriodicViewIncrement() {
+        function scheduleNext() {
+            // Interval between 2s and 4.5s
+            const delay = Math.floor(Math.random() * 2500) + 2000;
+            setTimeout(() => {
+                if (totalOnlineViews < MAX_TARGET_VIEWS) {
+                    const inc = Math.floor(Math.random() * 3) + 1; // +1, +2, or +3 views
+                    totalOnlineViews = Math.min(MAX_TARGET_VIEWS, totalOnlineViews + inc);
+                    localStorage.setItem('aso_bio_real_views_count', totalOnlineViews);
+                    viewCountEl.dataset.target = totalOnlineViews;
+
+                    if (metrics[currentMetricIndex].key === 'views') {
+                        viewCountEl.textContent = totalOnlineViews.toLocaleString();
+                        viewCountEl.classList.remove('count-pulse');
+                        void viewCountEl.offsetWidth; // Reflow trigger
+                        viewCountEl.classList.add('count-pulse');
+                    }
+                }
+                scheduleNext();
+            }, delay);
+        }
+        scheduleNext();
+    }
+
     if (viewWidget) {
         viewWidget.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -309,6 +365,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     fetchOnlineViews();
+    startPeriodicViewIncrement();
 
     // ==========================================================================
     // 4. Typewriter Bio Effect
@@ -388,17 +445,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ==========================================================================
-    // 6. Expandable Quick Links Tray
-    // ==========================================================================
-    if (toggleLinksBtn && linksTray) {
-        toggleLinksBtn.addEventListener('click', () => {
-            toggleLinksBtn.classList.toggle('active');
-            linksTray.classList.toggle('open');
-        });
-    }
-
-    // ==========================================================================
-    // 7. 3D Card Parallax Tilt Effect
+    // 6. 3D Card Parallax Tilt Effect
     // ==========================================================================
     let cardRect = profileCard.getBoundingClientRect();
     window.addEventListener('resize', () => {
